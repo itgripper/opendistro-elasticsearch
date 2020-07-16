@@ -1,0 +1,43 @@
+version: '3'
+services:
+  odfe-node1:
+    image: amazon/opendistro-for-elasticsearch:1.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - node.name=elasticsearch-node1
+      - opendistro_security.disabled=true
+    volumes:
+      - data:/usr/share/elasticsearch/data
+      - ./custom-elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - odfe-net
+  kibana:
+    image: amazon/opendistro-for-elasticsearch-kibana:1.9.0
+    container_name: odfe-kibana
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    networks:
+      - odfe-net
+    command: 
+      - /bin/bash
+      - -c 
+      - |
+        /usr/share/kibana/bin/kibana-plugin remove opendistro_security
+        /usr/local/bin/kibana-docker
+volumes:
+  data:
+
+
+networks:
+  odfe-net:

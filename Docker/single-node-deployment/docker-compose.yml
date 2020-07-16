@@ -1,0 +1,34 @@
+version: '3'
+services:
+  odfe-node1:
+    image: amazon/opendistro-for-elasticsearch:latest
+    container_name: odfe-node1
+    environment:
+      - discovery.type=single-node
+      - node.name=odfe-node1
+    volumes:
+      - odfe-data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600 # required for Performance Analyzer
+    networks:
+      - odfe-net
+  kibana:
+    image: amazon/opendistro-for-elasticsearch-kibana:latest
+    container_name: odfe-kibana
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
+    environment:
+      ELASTICSEARCH_URL: https://odfe-node1:9200
+      ELASTICSEARCH_HOSTS: https://odfe-node1:9200
+    networks:
+      - odfe-net
+
+volumes:
+  odfe-data1:
+  odfe-data2:
+
+networks:
+  odfe-net:
